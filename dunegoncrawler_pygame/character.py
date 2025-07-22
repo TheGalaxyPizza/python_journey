@@ -3,14 +3,15 @@ import math
 import constants
 
 class Character:
-    def __init__(self, x, y, animation_list):
+    def __init__(self, x, y, mob_animations, char_type):
+        self.char_type = char_type
         self.flip = False
-        self.animation_list = animation_list
+        self.animation_list = mob_animations[char_type]
         self.frame_index = 0
         self.action = 0#0 means idle, #1 means run
         self.update_time = pygame.time.get_ticks()
         self.running = False
-        self.image = animation_list[self.action][self.frame_index]
+        self.image = self.animation_list[self.action][self.frame_index]
         self.rect = pygame.Rect(0, 0, 40, 40)
         self.rect.center = (x, y)
 
