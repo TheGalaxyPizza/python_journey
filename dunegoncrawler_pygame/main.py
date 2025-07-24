@@ -1,6 +1,7 @@
 import pygame
 import constants
 from character import Character
+from weapon import Weapon
 
 pygame.init()
 
@@ -22,6 +23,9 @@ def scale_img(image, scale):
     h = image.get_height()
     return pygame.transform.scale(image, (w * scale, h * scale))
 
+#load weapon images
+bow_image = scale_img(pygame.image.load("assets/images/weapons/bow.png").convert_alpha(), constants.WEAPON_SCALE)
+
 
 #load character images
 mob_animations = []
@@ -32,7 +36,7 @@ for mob in mob_types:
     #load images
     animation_list = []
     for animation in animation_types:
-    #reset temporary list of images:
+        #reset temporary list of images:
         temp_list = []
         for i in range(4):
             img = pygame.image.load(f"assets/images/characters/{mob}/{animation}/{i}.png").convert_alpha()
@@ -40,9 +44,11 @@ for mob in mob_types:
             temp_list.append(img)
         animation_list.append(temp_list)
     mob_animations.append(animation_list)
-
 #create player
 player = Character(100, 100, mob_animations, 0)
+
+#create player's weapon
+bow = Weapon(bow_image)
 
 #main game loop
 run = True
@@ -71,10 +77,11 @@ while run:
 
     #update player
     player.update()
-
+    bow.update(player)
 
     #draw the player
     player.draw(screen)
+    bow.draw(screen)
 
     #event handler
     for event in pygame.event.get():
@@ -83,14 +90,14 @@ while run:
 
         #take keyboard presses
         if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_a or event.key == pygame.K_LEFT:
-                    moving_left = True
-                if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
-                    moving_right = True
-                if event.key == pygame.K_w or event.key == pygame.K_UP:
-                    moving_up = True
-                if event.key == pygame.K_s or event.key == pygame.K_DOWN:
-                    moving_down = True
+            if event.key == pygame.K_a or event.key == pygame.K_LEFT:
+                moving_left = True
+            if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
+                moving_right = True
+            if event.key == pygame.K_w or event.key == pygame.K_UP:
+                moving_up = True
+            if event.key == pygame.K_s or event.key == pygame.K_DOWN:
+                moving_down = True
 
         #take keyboard releases
         if event.type == pygame.KEYUP:
