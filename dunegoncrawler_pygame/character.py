@@ -8,6 +8,7 @@ class Character:
         self.flip = False
         self.animation_list = mob_animations[char_type]
         self.frame_index = 0
+        self.score = 0
         self.action = 0#0 means idle, #1 means run
         self.update_time = pygame.time.get_ticks()
         self.running = False

@@ -2,6 +2,7 @@ import pygame
 import constants
 from character import Character
 from weapon import Weapon
+from items import Item
 
 pygame.init()
 
@@ -20,8 +21,6 @@ moving_down = False
 #define font
 font = pygame.font.Font("assets/fonts/AtariClassic.ttf", 20)
 
-
-
 #help function to scale image
 def scale_img(image, scale):
     w = image.get_width()
@@ -32,6 +31,15 @@ def scale_img(image, scale):
 heart_empty = scale_img(pygame.image.load("assets/images/items/heart_empty.png").convert_alpha(), constants.ITEM_SCALE)
 heart_half = scale_img(pygame.image.load("assets/images/items/heart_half.png").convert_alpha(), constants.ITEM_SCALE)
 heart_full = scale_img(pygame.image.load("assets/images/items/heart_full.png").convert_alpha(), constants.ITEM_SCALE)
+
+#load coin images
+coin_images = []
+for a in range(4):
+    img = scale_img(pygame.image.load(f"assets/images/items/coin_f{a}.png").convert_alpha(), constants.ITEM_SCALE)
+    coin_images.append(img)
+
+#load potion image
+red_potion = scale_img(pygame.image.load("assets/images/items/potion_red.png").convert_alpha(), constants.POTION_SCALE)
 
 #load weapon images
 bow_image = scale_img(pygame.image.load("assets/images/weapons/bow.png").convert_alpha(), constants.WEAPON_SCALE)
@@ -64,15 +72,22 @@ def draw_info():
 
     #Draw Lives
     half_heart_drawn = False
-    for i in range(5):
-        if player.health >= ((i + 1) * 20):
-            screen.blit(heart_full, (10 + i * 50, 0))
+    for t in range(5):
+        if player.health >= ((t + 1) * 20):
+            screen.blit(heart_full, (10 + t * 50, 0))
         elif (player.health % 20 > 0) and half_heart_drawn == False:
-            screen.blit(heart_half, (10 + i * 50, 0))
+            screen.blit(heart_half, (10 + t * 50, 0))
             half_heart_drawn = True
         else:
-            screen.blit(heart_empty, (10 + i * 50, 0))
+            screen.blit(heart_empty, (10 + t * 50, 0))
 
+    #Show Score
+    draw_text(f"x{player.score}", font, constants.WHITE, constants.SCREEN_WIDTH - 97, 15)
+
+#function for outputting text onto the screen
+def draw_text(text, font, text_col, x, y):
+    img = font.render(text, True, text_col)
+    screen.blit(img, (x, y))
 
 #damage text class
 class DamageText(pygame.sprite.Sprite):
@@ -95,7 +110,7 @@ class DamageText(pygame.sprite.Sprite):
 
 
 #create player properties
-player = Character(100, 100, 100, mob_animations, 0)
+player = Character(100, 100, 50, mob_animations, 0)
 
 #create enemy properties
 enemy = Character(200, 300, 100, mob_animations, 1)
@@ -109,6 +124,23 @@ enemy_list = [enemy]
 #create sprite groups
 damage_text_group = pygame.sprite.Group()
 arrow_group = pygame.sprite.Group()
+item_group =  pygame.sprite.Group()
+
+#define item group constants
+
+
+#make coin counter coin
+score_coin = Item(constants.SCREEN_WIDTH - 115, 23, 0, coin_images)
+item_group.add(score_coin)
+
+#display potion
+potion_images = [red_potion]
+potion = Item(200, 200, 1, potion_images)
+item_group.add(potion)
+
+#display coin
+coin = Item(400, 400, 0, coin_images)
+item_group.add(coin)
 
 
 
@@ -144,7 +176,6 @@ while run:
     #update arrows
     if arrow:
         arrow_group.add(arrow)
-
     for arrow in arrow_group:
         damage, damage_pos = arrow.update(enemy_list)
         if damage:
@@ -157,7 +188,8 @@ while run:
         enemy.update()
         damage_text_group.update()
 
-    print(enemy.health)
+    #update items
+    item_group.update(player)
 
     #draw the player
     player.draw(screen)
@@ -176,6 +208,12 @@ while run:
 
     #draw info
     draw_info()
+
+    #draw items
+    item_group.draw(screen)
+
+    #draw coin counter
+    score_coin.draw(screen)
 
 
 

@@ -3,6 +3,7 @@ import pygame
 import math
 import constants
 
+
 class Weapon:
     def __init__(self, image, arrow_image):
         self.original_image = image
