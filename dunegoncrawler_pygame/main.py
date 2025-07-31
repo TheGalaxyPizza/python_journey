@@ -3,6 +3,7 @@ import constants
 from character import Character
 from weapon import Weapon
 from items import Item
+from world import World
 
 pygame.init()
 
@@ -45,6 +46,14 @@ red_potion = scale_img(pygame.image.load("assets/images/items/potion_red.png").c
 bow_image = scale_img(pygame.image.load("assets/images/weapons/bow.png").convert_alpha(), constants.WEAPON_SCALE)
 arrow_image = scale_img(pygame.image.load("assets/images/weapons/arrow.png").convert_alpha(), constants.WEAPON_SCALE)
 
+#load tile map images
+tile_list = []
+for i in range(constants.TILE_TYPES):
+    tile_image = pygame.image.load(f"assets/images/tiles/{i}.png").convert_alpha()
+    tile_image = pygame.transform.scale(tile_image, (constants.TILE_SIZE, constants.TILE_SIZE))
+    tile_list.append(tile_image)
+
+
 #load character images
 mob_animations = []
 mob_types = ["elf", "imp", "skeleton", "goblin", "muddy", "tiny_zombie", "big_demon"]
@@ -62,6 +71,11 @@ for mob in mob_types:
             temp_list.append(img)
         animation_list.append(temp_list)
     mob_animations.append(animation_list)
+
+#function for outputting text onto the screen
+def draw_text(text, font, text_col, x, y):
+    img = font.render(text, True, text_col)
+    screen.blit(img, (x, y))
 
 
 #function for displaying game info
@@ -84,10 +98,22 @@ def draw_info():
     #Show Score
     draw_text(f"x{player.score}", font, constants.WHITE, constants.SCREEN_WIDTH - 97, 15)
 
-#function for outputting text onto the screen
-def draw_text(text, font, text_col, x, y):
-    img = font.render(text, True, text_col)
-    screen.blit(img, (x, y))
+world_data = [
+[7, 7, 7, 7, 7, 7],
+[7, 0, 1, 2, 3, 7],
+[7, 3, 4, 5, 5, 7],
+[7, 6, 6, 6, 6, 7],
+[7, 0, 0, 0, 0, 7],
+[7, 7, 7, 0, 7, 7],
+]
+
+world = World()
+world.process_data(world_data, tile_list)
+
+
+
+
+
 
 #damage text class
 class DamageText(pygame.sprite.Sprite):
@@ -154,6 +180,8 @@ while run:
     #Background Color
     screen.fill(constants.BG)
 
+
+
     #player movement management
     dx = 0
     dy = 0
@@ -190,6 +218,9 @@ while run:
 
     #update items
     item_group.update(player)
+
+    #draw world
+    world.draw(screen)
 
     #draw the player
     player.draw(screen)

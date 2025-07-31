@@ -37,4 +37,4 @@ class Item(pygame.sprite.Sprite):
             self.frame_index = 0
 
     def draw(self, surface):
-        surface.blit(self.image, self.rect)
+            surface.blit(self.image, self.rect)
