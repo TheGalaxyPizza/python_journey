@@ -55,7 +55,7 @@ class Arrow(pygame.sprite.Sprite):
         self.dx = math.cos(math.radians(self.angle)) * constants.ARROW_SPEED
         self.dy = -(math.sin(math.radians(self.angle)) * constants.ARROW_SPEED)
 
-    def update(self, screen_scroll, enemy_list):
+    def update(self, screen_scroll, obstacle_tiles, enemy_list):
         #reset variables
         damage = 0
         damage_pos = None
@@ -63,6 +63,11 @@ class Arrow(pygame.sprite.Sprite):
         #reposition based on speed
         self.rect.x += screen_scroll[0] + self.dx
         self.rect.y += screen_scroll[1] + self.dy
+
+        #check for collision between arrow and tile walls
+        for obstacle in obstacle_tiles:
+            if obstacle[1].colliderect(self.rect):
+                self.kill()
 
 
         #reposition based off of speed
@@ -79,6 +84,7 @@ class Arrow(pygame.sprite.Sprite):
                 damage = 10 + random.randint(-5, 5)
                 damage_pos = enemy.rect
                 enemy.health -= damage
+                enemy.hit = True
                 self.kill()
                 break
 

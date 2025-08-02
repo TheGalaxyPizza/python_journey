@@ -209,7 +209,7 @@ while run:
     if arrow:
         arrow_group.add(arrow)
     for arrow in arrow_group:
-        damage, damage_pos = arrow.update(screen_scroll, enemy_list)
+        damage, damage_pos = arrow.update(screen_scroll,world.obstacle_tiles, enemy_list)
         if damage:
             damage_text = DamageText(damage_pos.centerx, damage_pos.centery - 30, str(damage), constants.RED)
             damage_text_group.add(damage_text)
@@ -217,7 +217,7 @@ while run:
 
     #update enemy
     for enemy in enemy_list:
-        enemy.ai(screen_scroll)
+        enemy.ai(player, world.obstacle_tiles,screen_scroll)
         enemy.update()
 
         damage_text_group.update()

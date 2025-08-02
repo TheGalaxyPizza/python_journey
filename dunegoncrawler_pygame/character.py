@@ -15,6 +15,10 @@ class Character:
         self.running = False
         self.health = health
         self.alive = True
+        self.hit = False
+        self.last_hit = False
+        self.last_hit = pygame.time.get_ticks()
+        self.stunned = False
 
         self.image = self.animation_list[self.action][self.frame_index]
         self.rect = pygame.Rect(0, 0, constants.TILE_SIZE * size, constants.TILE_SIZE * size)
@@ -81,11 +85,59 @@ class Character:
 
         return screen_scroll
 
-    def ai(self, screen_scroll):
-
+    def ai(self, player, obstacle_tiles, screen_scroll):
+        clipped_line = ()
+        stunt_cooldown = 100
+        ai_dx = 0
+        ai_dy = 0
         #reposition the mobs based on screen scroll
         self.rect.x += screen_scroll[0]
         self.rect.y += screen_scroll[1]
+
+        #create a line of sight from the enemy to the player
+        line_of_sight = ((self.rect.centerx, self.rect.centery),(player.rect.centerx, player.rect.centery))
+
+        #check if line of sight passes through an obstacle tile
+        for obstacle in obstacle_tiles:
+            if obstacle[1].clipline(line_of_sight):
+                clipped_line = obstacle[1].clipline(line_of_sight)
+
+
+        #check distance to player
+        dist = math.sqrt(((self.rect.centerx - player.rect.centerx) ** 2) + ((self.rect.centery - player.rect.centery) ** 2))
+        if not clipped_line and dist > constants.RANGE:
+            if dist > constants.RANGE:
+                if self.rect.centerx > player.rect.centerx:
+                    ai_dx = -constants.ENEMY_SPEED
+                if self.rect.centerx < player.rect.centerx:
+                    ai_dx = constants.ENEMY_SPEED
+                if self.rect.centery > player.rect.centery:
+                    ai_dy = -constants.ENEMY_SPEED
+                if self.rect.centery < player.rect.centery:
+                    ai_dy = constants.ENEMY_SPEED
+
+        if self.alive:
+            if not self.stunned:
+                #move toward player
+                self.move(ai_dx, ai_dy, obstacle_tiles)
+
+                #attack player
+                if dist < constants.ATTACK_RANGE and player.hit == False:
+                    player.health -= 10
+                    player.hit = True
+                    player.last_hit = pygame.time.get_ticks()
+
+            #check if hit
+            if self.hit:
+                self.hit = False
+                self.last_hit = pygame.time.get_ticks()
+                self.stunned = True
+                self.running = False
+                self.update_action(0)
+
+            if pygame.time.get_ticks() - self.last_hit > stunt_cooldown:
+                self.stunned = False
+
 
     def update(self):
         #check if character has died
@@ -98,6 +150,12 @@ class Character:
             self.update_action(1)
         else:
             self.update_action(0)
+
+        #timer to reset player taking a hit
+        hit_cooldown = 1000
+        if self.char_type == 0:
+            if self.hit and (pygame.time.get_ticks() - self.last_hit) > hit_cooldown:
+                self.hit = False
 
         #player animation cooldown
         animation_cooldown = 70
