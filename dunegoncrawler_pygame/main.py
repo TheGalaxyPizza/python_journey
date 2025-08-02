@@ -217,7 +217,7 @@ while run:
 
     #update enemy
     for enemy in enemy_list:
-        enemy.ai(player, world.obstacle_tiles,screen_scroll)
+        enemy.ai(player, world.obstacle_tiles, screen_scroll)
         enemy.update()
 
         damage_text_group.update()

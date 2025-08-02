@@ -90,6 +90,7 @@ class Character:
         stunt_cooldown = 100
         ai_dx = 0
         ai_dy = 0
+
         #reposition the mobs based on screen scroll
         self.rect.x += screen_scroll[0]
         self.rect.y += screen_scroll[1]

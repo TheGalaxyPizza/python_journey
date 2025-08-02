@@ -10,6 +10,7 @@ class Weapon:
         self.angle = 0
         self.arrow_image = arrow_image
         self.image = pygame.transform.rotate(self.original_image, self.angle)
+
         self.rect = self.image.get_rect()
         self.fired = False
         self.last_shot = pygame.time.get_ticks()
