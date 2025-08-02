@@ -13,7 +13,6 @@ class Item(pygame.sprite.Sprite):
         self.rect.center = (x, y)
         self.dummy_coin = dummy_coin
 
-
     def update(self, screen_scroll, player):
         #doesn't apply to the dummy coin
         if not self.dummy_coin:

@@ -35,6 +35,7 @@ class Weapon:
             self.fired = False
 
         return arrow
+
     def draw(self, surface):
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         surface.blit(self.image, ((self.rect.centerx - int(self.image.get_width() / 2)), self.rect.centery - int(self.image.get_height() / 2)))

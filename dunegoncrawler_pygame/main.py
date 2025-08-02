@@ -46,9 +46,7 @@ for a in range(4):
 #load potion image
 red_potion = scale_img(pygame.image.load("assets/images/items/potion_red.png").convert_alpha(), constants.POTION_SCALE)
 
-item_images = []
-item_images.append(coin_images)
-item_images.append(red_potion)
+item_images = [coin_images, red_potion]
 
 #load weapon images
 bow_image = scale_img(pygame.image.load("assets/images/weapons/bow.png").convert_alpha(), constants.WEAPON_SCALE)
@@ -163,9 +161,11 @@ damage_text_group = pygame.sprite.Group()
 arrow_group = pygame.sprite.Group()
 item_group =  pygame.sprite.Group()
 
+
 #make coin counter coin
 score_coin = Item(constants.SCREEN_WIDTH - 111, 23, 0, coin_images, True)
 item_group.add(score_coin)
+
 #add the items from level data
 for item in world.item_list:
     item_group.add(item)
@@ -195,8 +195,7 @@ while run:
         dy = constants.SPEED
 
     #move the player
-    screen_scroll = player.move(dx, dy)
-
+    screen_scroll = player.move(dx, dy, world.obstacle_tiles)
 
 
     #update world
