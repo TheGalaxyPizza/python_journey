@@ -1,6 +1,7 @@
 import pygame
 import math
 import constants
+import weapon
 
 class Character:
     def __init__(self, x, y, health, mob_animations, char_type, boss, size):
@@ -18,6 +19,7 @@ class Character:
         self.hit = False
         self.last_hit = False
         self.last_hit = pygame.time.get_ticks()
+        self.last_attack = pygame.time.get_ticks()
         self.stunned = False
 
         self.image = self.animation_list[self.action][self.frame_index]
@@ -85,11 +87,12 @@ class Character:
 
         return screen_scroll
 
-    def ai(self, player, obstacle_tiles, screen_scroll):
+    def ai(self, player, obstacle_tiles, screen_scroll, fireball_image):
         clipped_line = ()
         stunt_cooldown = 100
         ai_dx = 0
         ai_dy = 0
+        fireball = None
 
         #reposition the mobs based on screen scroll
         self.rect.x += screen_scroll[0]
@@ -127,7 +130,13 @@ class Character:
                     player.health -= 10
                     player.hit = True
                     player.last_hit = pygame.time.get_ticks()
-
+                #boss enemies shoot fireballs
+                fireball_cooldown = 700
+                if self.boss:
+                    if dist < 500:
+                        if pygame.time.get_ticks() - self.last_attack >= fireball_cooldown:
+                            fireball = weapon.Fireball(fireball_image, self.rect.centerx, self.rect.centery, player.rect.centerx, player.rect.centery)
+                            self.last_attack = pygame.time.get_ticks()
             #check if hit
             if self.hit:
                 self.hit = False
@@ -139,6 +148,7 @@ class Character:
             if pygame.time.get_ticks() - self.last_hit > stunt_cooldown:
                 self.stunned = False
 
+        return fireball
 
     def update(self):
         #check if character has died
@@ -178,11 +188,13 @@ class Character:
             self.update_time = pygame.time.get_ticks()
 
     def draw(self, surface):
-
         #Character Dynamics
         flipped_image = pygame.transform.flip(self.image, self.flip, False)
         if self.char_type == 0:
             surface.blit(flipped_image, (self.rect.x, self.rect.y - constants.SCALE * constants.OFFSET))
         else:
             surface.blit(flipped_image, self.rect)
-        pygame.draw.rect(surface, constants.RED, self.rect, 1)
+
+
+        #this makes the character's hit box:
+        #pygame.draw.rect(surface, constants.RED, self.rect, 1)

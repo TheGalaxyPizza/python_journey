@@ -51,6 +51,7 @@ item_images = [coin_images, red_potion]
 #load weapon images
 bow_image = scale_img(pygame.image.load("assets/images/weapons/bow.png").convert_alpha(), constants.WEAPON_SCALE)
 arrow_image = scale_img(pygame.image.load("assets/images/weapons/arrow.png").convert_alpha(), constants.WEAPON_SCALE)
+fireball_image = scale_img(pygame.image.load("assets/images/weapons/fireball.png").convert_alpha(), constants.FIREBALL_SCALE)
 
 #load tile map images
 tile_list = []
@@ -160,6 +161,7 @@ enemy_list = world.character_list
 damage_text_group = pygame.sprite.Group()
 arrow_group = pygame.sprite.Group()
 item_group =  pygame.sprite.Group()
+fireball_group = pygame.sprite.Group()
 
 
 #make coin counter coin
@@ -217,10 +219,17 @@ while run:
 
     #update enemy
     for enemy in enemy_list:
-        enemy.ai(player, world.obstacle_tiles, screen_scroll)
-        enemy.update()
+        fireball = enemy.ai(player, world.obstacle_tiles, screen_scroll, fireball_image)
+        if fireball:
+            fireball_group.add(fireball)
+
+        if enemy.alive:
+            enemy.update()
 
         damage_text_group.update()
+
+        #update fireballs
+        fireball_group.update(screen_scroll, player)
 
 
     #update items
@@ -238,6 +247,10 @@ while run:
     #draw the arrows
     for arrow in arrow_group:
         arrow.draw(screen)
+
+    #draw fireballs
+    for fireball in fireball_group:
+        fireball.draw(screen)
 
     #draw the enemies
     for enemy in enemy_list:

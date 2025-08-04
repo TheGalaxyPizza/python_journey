@@ -1,6 +1,6 @@
+import constants
 from character import Character
 from items import Item
-import constants
 
 
 class World:
