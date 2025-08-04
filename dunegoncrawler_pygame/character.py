@@ -173,7 +173,7 @@ class Character:
         if new_action != self.action:
             self.action = new_action
 
-        #update the animation settings
+            #update the animation settings
             self.frame_index = 0
             self.update_time = pygame.time.get_ticks()
 

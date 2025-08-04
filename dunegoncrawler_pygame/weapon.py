@@ -56,7 +56,7 @@ class Arrow(pygame.sprite.Sprite):
         self.dx = math.cos(math.radians(self.angle)) * constants.ARROW_SPEED
         self.dy = -(math.sin(math.radians(self.angle)) * constants.ARROW_SPEED)
 
-    def update(self, screen_scroll, obstacle_tiles, enemy_list):
+    def update(self, screen_scroll, enemy_list, obstacle_tiles):
         #reset variables
         damage = 0
         damage_pos = None
