@@ -161,6 +161,10 @@ class ScreenFade:
             pygame.draw.rect(screen, self.color,(0, 0 - self.fade_counter, constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT//2))
             pygame.draw.rect(screen, self.color,(0, constants.SCREEN_HEIGHT //2 + self.fade_counter, constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
 
+        elif self.direction == 2:
+            pygame.draw.rect(screen, self.color, (0, 0, constants.SCREEN_WIDTH, 0 + self.fade_counter))
+
+
         if self.fade_counter >= constants.SCREEN_WIDTH:
             fade_complete = True
 
@@ -210,6 +214,7 @@ for item in world.item_list:
 
 #create screen fades
 intro_fade = ScreenFade(1, constants.BLACK, 4)
+death_fade = ScreenFade(2, constants.PINK, 4)
 
 #main game loop
 run = True
@@ -222,57 +227,57 @@ while run:
     screen.fill(constants.BG)
 
 
+    if player.alive:
+        #player movement management
+        dx = 0
+        dy = 0
+        if moving_right:
+            dx = constants.SPEED
+        if moving_left:
+            dx = -constants.SPEED
+        if moving_up:
+            dy = -constants.SPEED
+        if moving_down:
+            dy = constants.SPEED
 
-    #player movement management
-    dx = 0
-    dy = 0
-    if moving_right:
-        dx = constants.SPEED
-    if moving_left:
-        dx = -constants.SPEED
-    if moving_up:
-        dy = -constants.SPEED
-    if moving_down:
-        dy = constants.SPEED
-
-    #move the player
-    screen_scroll, level_complete = player.move(dx, dy, world.obstacle_tiles, world.exit_tile)
+        #move the player
+        screen_scroll, level_complete = player.move(dx, dy, world.obstacle_tiles, world.exit_tile)
 
 
-    #update world
-    world.update(screen_scroll)
+        #update world
+        world.update(screen_scroll)
 
-    #update player
-    player.update()
-    arrow = bow.update(player)
+        #update player
+        player.update()
+        arrow = bow.update(player)
 
-    #update arrows
-    if arrow:
-        arrow_group.add(arrow)
-    for arrow in arrow_group:
-        damage, damage_pos = arrow.update(screen_scroll, enemy_list, world.obstacle_tiles)
-        if damage:
-            damage_text = DamageText(damage_pos.centerx, damage_pos.centery - 30, str(damage), constants.RED)
-            damage_text_group.add(damage_text)
-    damage_text_group.update()
-
-    #update enemy
-    for enemy in enemy_list:
-        fireball = enemy.ai(player, world.obstacle_tiles, screen_scroll, fireball_image)
-        if fireball:
-            fireball_group.add(fireball)
-
-        if enemy.alive:
-            enemy.update()
-
+        #update arrows
+        if arrow:
+            arrow_group.add(arrow)
+        for arrow in arrow_group:
+            damage, damage_pos = arrow.update(screen_scroll, enemy_list, world.obstacle_tiles)
+            if damage:
+                damage_text = DamageText(damage_pos.centerx, damage_pos.centery - 30, str(damage), constants.RED)
+                damage_text_group.add(damage_text)
         damage_text_group.update()
 
-        #update fireballs
-        fireball_group.update(screen_scroll, player)
+        #update enemy
+        for enemy in enemy_list:
+            fireball = enemy.ai(player, world.obstacle_tiles, screen_scroll, fireball_image)
+            if fireball:
+                fireball_group.add(fireball)
+
+            if enemy.alive:
+                enemy.update()
+
+            damage_text_group.update()
+
+            #update fireballs
+            fireball_group.update(screen_scroll, player)
 
 
-    #update items
-    item_group.update(screen_scroll, player)
+        #update items
+        item_group.update(screen_scroll, player)
 
     #draw world
     world.draw(screen)
@@ -339,6 +344,32 @@ while run:
         if intro_fade.fade():
             start_intro = False
             intro_fade.fade_counter = 0
+
+    #show death screen
+    if not player.alive:
+        if death_fade.fade():
+            death_fade.fade_counter = 0
+            start_intro = True
+            world_data = reset_level()
+            level = 1
+            #load in level data and create world
+            with open(f"levels/level{level}_data.csv", newline="") as csvfile:
+                reader = csv.reader(csvfile, delimiter = ",")
+                for x, row in enumerate(reader):
+                    for y, tile in enumerate(row):
+                        world_data[x][y] = int(tile)
+            world = World()
+            world.process_data(world_data, tile_list, item_images, mob_animations)
+            temp_score = player.score
+            player = world.player
+            player.score = temp_score
+            enemy_list = world.character_list
+            score_coin = Item(constants.SCREEN_WIDTH - 111, 23, 0, coin_images, True)
+            item_group.add(score_coin)
+            #add the items from level data
+            for item in world.item_list:
+                item_group.add(item)
+
 
 
 
