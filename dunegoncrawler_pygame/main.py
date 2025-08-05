@@ -15,6 +15,7 @@ clock = pygame.time.Clock()
 
 #define game variables
 level = 1
+start_intro = True
 screen_scroll = [0, 0]
 
 #define player movement variables
@@ -143,6 +144,28 @@ class DamageText(pygame.sprite.Sprite):
         if self.counter > 30:
             self.kill()
 
+#screen fade class
+class ScreenFade:
+    def __init__(self, direction, color, speed):
+        self.direction = direction
+        self.color = color
+        self.speed = speed
+        self.fade_counter = 0
+
+    def fade(self):
+        fade_complete = False
+        self.fade_counter += self.speed
+        if self.direction == 1:
+            pygame.draw.rect(screen, self.color, (0 - self.fade_counter, 0, constants.SCREEN_WIDTH // 2, constants.SCREEN_HEIGHT))
+            pygame.draw.rect(screen, self.color, (constants.SCREEN_WIDTH // 2 + self.fade_counter, 0, constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
+            pygame.draw.rect(screen, self.color,(0, 0 - self.fade_counter, constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT//2))
+            pygame.draw.rect(screen, self.color,(0, constants.SCREEN_HEIGHT //2 + self.fade_counter, constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
+
+        if self.fade_counter >= constants.SCREEN_WIDTH:
+            fade_complete = True
+
+        return fade_complete
+
 #create empty tile list
 world_data = []
 for row in range(constants.ROWS):
@@ -184,6 +207,9 @@ item_group.add(score_coin)
 #add the items from level data
 for item in world.item_list:
     item_group.add(item)
+
+#create screen fades
+intro_fade = ScreenFade(1, constants.BLACK, 4)
 
 #main game loop
 run = True
@@ -284,6 +310,7 @@ while run:
 
     #check level complete
     if level_complete:
+        start_intro = True
         level += 1
         world_data = reset_level()
         #load in level data and create world
@@ -306,6 +333,12 @@ while run:
         #add the items from level data
         for item in world.item_list:
             item_group.add(item)
+
+    #show intro
+    if start_intro:
+        if intro_fade.fade():
+            start_intro = False
+            intro_fade.fade_counter = 0
 
 
 
