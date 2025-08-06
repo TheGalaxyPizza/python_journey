@@ -1,12 +1,15 @@
 import pygame
 import constants
 import csv
+from pygame import mixer
 from weapon import Weapon
 from items import Item
 from world import World
 from button import Button
 
+mixer.init()
 pygame.init()
+
 
 screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
 pygame.display.set_caption("Dungeon Crawler")
@@ -35,6 +38,22 @@ def scale_img(image, scale):
     w = image.get_width()
     h = image.get_height()
     return pygame.transform.scale(image, (w * scale, h * scale))
+
+#load music and sounds
+pygame.mixer.music.load("Assets/Audio/game_music.wav")
+pygame.mixer.music.set_volume(1)
+pygame.mixer.music.play(-1, 0.0, 5000)
+pause_music = pygame.mixer.Sound("Assets/Audio/pause_music.mp3")
+pygame.mixer.music.set_volume(0.3)
+shot_fx = pygame.mixer.Sound("assets/audio/arrow_shot.mp3")
+shot_fx.set_volume(0.5)
+hit_fx = pygame.mixer.Sound("assets/audio/arrow_hit.wav")
+hit_fx.set_volume(0.5)
+coin_fx = pygame.mixer.Sound("assets/audio/coin.wav")
+coin_fx.set_volume(0.5)
+heal_fx = pygame.mixer.Sound("assets/audio/heal.wav")
+heal_fx.set_volume(0.5)
+
 
 #load button images
 restart_img = scale_img(pygame.image.load("assets/images/buttons/button_restart.png").convert_alpha(), constants.BUTTON_SCALE)
@@ -249,6 +268,9 @@ while run:
             screen.fill(constants.MENU_BG)
             if resume_button.draw(screen):
                 pause_game = False
+                pygame.mixer.music.unpause()
+                pause_music.stop()
+
             if exit_button.draw(screen):
                 run = False
         else:
@@ -282,11 +304,13 @@ while run:
                 #update arrows
                 if arrow:
                     arrow_group.add(arrow)
+                    shot_fx.play()
                 for arrow in arrow_group:
                     damage, damage_pos = arrow.update(screen_scroll, enemy_list, world.obstacle_tiles)
                     if damage:
                         damage_text = DamageText(damage_pos.centerx, damage_pos.centery - 30, str(damage), constants.RED)
                         damage_text_group.add(damage_text)
+                        hit_fx.play()
                 damage_text_group.update()
 
                 #update enemy
@@ -305,7 +329,7 @@ while run:
 
 
                 #update items
-                item_group.update(screen_scroll, player)
+                item_group.update(screen_scroll, player, coin_fx, heal_fx)
 
             #draw stuff
             world.draw(screen)
@@ -415,6 +439,9 @@ while run:
 
             if event.key == pygame.K_ESCAPE:
                 pause_game = True
+                pygame.mixer.music.pause()
+                pause_music.play(-1)
+                pause_music.set_volume(0.2)
 
         #take keyboard releases
         if event.type == pygame.KEYUP:
